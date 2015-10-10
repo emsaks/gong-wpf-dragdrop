@@ -39,16 +39,8 @@ namespace GongSolutions.Wpf.DragDrop
       }
     }
 
-    /// <summary>
-    /// Performs a drop.
-    /// </summary>
-    /// <param name="dropInfo">Information about the drop.</param>
-    public virtual void Drop(IDropInfo dropInfo)
+    public int TryDetach(IDropInfo dropInfo)
     {
-      if (dropInfo == null || dropInfo.DragInfo == null) {
-        return;
-      }
-      
       var insertIndex = dropInfo.UnfilteredInsertIndex;
       var destinationList = dropInfo.TargetCollection.TryGetList();
       var data = ExtractData(dropInfo.Data);
@@ -60,8 +52,7 @@ namespace GongSolutions.Wpf.DragDrop
                      || dropInfo.DragInfo.VisualSourceItem is TreeViewItem
                      || dropInfo.DragInfo.VisualSourceItem is MenuItem
                      || dropInfo.DragInfo.VisualSourceItem is ListBoxItem;
-      if (moveData)
-      {
+      if (moveData) {
         var sourceList = dropInfo.DragInfo.SourceCollection.TryGetList();
 
         foreach (var o in data) {
@@ -76,6 +67,25 @@ namespace GongSolutions.Wpf.DragDrop
           }
         }
       }
+
+      return insertIndex;
+    }
+
+    /// <summary>
+    /// Performs a drop.
+    /// </summary>
+    /// <param name="dropInfo">Information about the drop.</param>
+    public virtual void Drop(IDropInfo dropInfo)
+    {
+      if (dropInfo == null || dropInfo.DragInfo == null) {
+        return;
+      }
+      
+      // remove dragged items from source if needed, and get an updated insertIndex
+      // (in case the source and target collection are the same)
+      var insertIndex = TryDetach(dropInfo);
+      var destinationList = dropInfo.TargetCollection.TryGetList();
+      var data = ExtractData(dropInfo.Data);
 
       var tabControl = dropInfo.VisualTarget as TabControl;
 
