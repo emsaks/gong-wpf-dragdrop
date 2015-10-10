@@ -127,5 +127,22 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
 
       yield break;
     }
-  }
+
+    public static DependencyObject GetDescendent(this DependencyObject d, Func<DependencyObject, bool> where, Func<DependencyObject, bool> skip)
+    {      
+      var childCount = VisualTreeHelper.GetChildrenCount(d);
+
+      for (var n = 0; n < childCount; n++) {
+        var child = VisualTreeHelper.GetChild(d, n);
+
+        if (where(child)) { return child; }
+        if (!skip(child)) {
+          var grandchild = GetDescendent(child, where, skip);
+          if (grandchild != null) { return grandchild;  } 
+        }
+      }
+
+      return null;      
+    }
+  }  
 }
