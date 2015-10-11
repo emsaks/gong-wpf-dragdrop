@@ -696,26 +696,38 @@ namespace GongSolutions.Wpf.DragDrop
 
     private static void DragSource_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+      // var itemsPresenter = (sender as DependencyObject).FindDescendent((d) => (d as Panel)?.IsItemsHost ?? false, (d) => d is ItemsControl);            
+      // todo: use container as the container in DragInfo...
+      var container = (e.OriginalSource as DependencyObject).ContainerOrDefault((ItemsControl)sender);
+
       // Ignore the click if clickCount != 1 or the user has clicked on a scrollbar.
       var elementPosition = e.GetPosition((IInputElement)sender);
       if (e.ClickCount != 1
-          || (sender as UIElement).IsDragSourceIgnored()
-          || (e.Source as UIElement).IsDragSourceIgnored()
+          || container == null
+      //       This appears to be pointless because the sender obviously requested to be a drag source
+      //  || (sender as UIElement).IsDragSourceIgnored()          
+      /*       we already traced back from OriginalSource and looked for any intervening IsDragSourceIgnored.
+          || (e.Source as UIElement).IsDragSourceIgnored() */
           || (e.OriginalSource as UIElement).IsDragSourceIgnored()
-          || (sender is TabControl) && !HitTestUtilities.HitTest4Type<TabPanel>(sender, elementPosition)
-          // We can generalize these tests by checking for IsMouseCaptured in PreviewMouseMove...
-          /* || HitTestUtilities.HitTest4Type<RangeBase>(sender, elementPosition)
+          || (e.OriginalSource as DependencyObject).FindAncestor(p => (bool)p.GetValue(DragSourceIgnoreProperty), r => r == sender) != null
+      //  || (sender is TabControl) && !HitTestUtilities.HitTest4Type<TabPanel>(sender, elementPosition)
+      //       We can generalize these tests by checking for IsMouseCaptured in PreviewMouseMove...
+      /*  || HitTestUtilities.HitTest4Type<RangeBase>(sender, elementPosition)
           || HitTestUtilities.HitTest4Type<ButtonBase>(sender, elementPosition)
           || HitTestUtilities.HitTest4Type<TextBoxBase>(sender, elementPosition)
           || HitTestUtilities.HitTest4Type<PasswordBox>(sender, elementPosition)
           || HitTestUtilities.HitTest4Type<ComboBox>(sender, elementPosition) */
-          || HitTestUtilities.HitTest4GridViewColumnHeader(sender, elementPosition)
-          || HitTestUtilities.HitTest4DataGridTypes(sender, elementPosition)
-          || HitTestUtilities.IsNotPartOfSender(sender, e)) {
+      //       These are unnecessary b/c we already made sure we have the nearest child *container*
+      //       and if we're in a Grid within the container, we *should* allow it to initiate a drag
+      /*  || HitTestUtilities.HitTest4GridViewColumnHeader(sender, elementPosition)
+          || HitTestUtilities.HitTest4DataGridTypes(sender, elementPosition) */
+      //       This is unnecessary b/c we already traced a path back to sender with ContainerOrDefault
+      //  || HitTestUtilities.IsNotPartOfSender(sender, e)
+      ) {
         m_DragInfo = null;
         return;
       }
-
+     
       m_DragInfo = new DragInfo(sender, e);
 
       var dragHandler = TryGetDragHandler(m_DragInfo, sender as UIElement);

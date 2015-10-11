@@ -128,7 +128,7 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
       yield break;
     }
 
-    public static DependencyObject GetDescendent(this DependencyObject d, Func<DependencyObject, bool> where, Func<DependencyObject, bool> skip)
+    public static DependencyObject FindDescendent(this DependencyObject d, Func<DependencyObject, bool> where, Func<DependencyObject, bool> skip)
     {      
       var childCount = VisualTreeHelper.GetChildrenCount(d);
 
@@ -137,12 +137,51 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
 
         if (where(child)) { return child; }
         if (!skip(child)) {
-          var grandchild = GetDescendent(child, where, skip);
+          var grandchild = FindDescendent(child, where, skip);
           if (grandchild != null) { return grandchild;  } 
         }
       }
 
       return null;      
+    }
+
+    public static DependencyObject FindAncestor(this DependencyObject d, Func<DependencyObject, bool> where)
+    {
+      return d.FindAncestor(where, p => p == null);
+    }
+
+    public static DependencyObject FindAncestor(this DependencyObject d, Func<DependencyObject, bool> where, Func<DependencyObject, bool> stop)
+    {
+      DependencyObject current = VisualTreeHelper.GetParent(FindVisualTreeRoot(d));
+      while (current != null && !where(current)) {
+        if (stop(current)) { return null; }
+        current = VisualTreeHelper.GetParent(current);        
+      }
+
+      return current;
+    }
+
+    public static DependencyObject ContainerOrDefault(this DependencyObject d, ItemsControl root)
+    {
+      DependencyObject current = d;
+      DependencyObject container = null;
+
+      while (current != null) {
+        DependencyObject parent = VisualTreeHelper.GetParent(current);
+        if (((parent as Panel)?.IsItemsHost ?? false) && container == null) {
+          var owner = FindAncestor(current, a => a is ItemsControl) as ItemsControl;
+          if (owner == null) { return null; }
+          if (owner.ItemContainerGenerator.IndexFromContainer(current) >= 0) { container = current; }
+          parent = owner;          
+        } else if(current is ItemsControl && (parent as Panel)?.IsItemsHost != true) {
+          container = null;
+        }
+
+        if (parent == root) { return container; }                       
+        current = parent;        
+      }
+
+      return null;
     }
   }  
 }
