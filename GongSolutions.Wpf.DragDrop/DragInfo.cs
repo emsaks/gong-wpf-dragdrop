@@ -15,7 +15,7 @@ namespace GongSolutions.Wpf.DragDrop
   /// 
   /// <remarks>
   /// The <see cref="DragInfo"/> class holds all of the framework's information about the source
-  /// of a drag. It is used by <see cref="IDragSource.StartDrag"/> to determine whether a drag 
+  /// of a drag. It is used by <see cref="IDragSource.Dragged"/> to determine whether a drag 
   /// can start, and what the dragged data should be.
   /// </remarks>
   public class DragInfo : IDragInfo
@@ -24,79 +24,59 @@ namespace GongSolutions.Wpf.DragDrop
     /// Initializes a new instance of the DragInfo class.
     /// </summary>
     /// 
-    /// <param name="sender">
-    /// The sender of the mouse event that initiated the drag.
-    /// </param>
-    /// 
     /// <param name="e">
     /// The mouse event that initiated the drag.
-    /// </param>
-    public DragInfo(object sender, MouseButtonEventArgs e)
+    /// </param> 
+    public DragInfo(ItemsControl root, MouseButtonEventArgs e)
     {
-      this.DragStartPosition = e.GetPosition((IInputElement)sender);
+      int index = -1;
+      ItemsControl owner = null;
+      this.SourceContainer = (e.OriginalSource as DependencyObject)?.ContainerOrDefault(root, ref owner, ref index);
+      if (this.SourceContainer == null) { return;  }
+      this.SourceItem = owner.ItemContainerGenerator.ItemFromContainer(this.SourceContainer);
+
+      if (this.SourceItem is CollectionViewGroup) {
+        this.SourceGroup = (CollectionViewGroup)this.SourceItem;
+        // this is probably never necessary - ListView removes empty groups.
+        if ((this.SourceItem as CollectionViewGroup).Items.Count() == 0) {
+          this.SourceItem = this.SourceContainer =  null;
+          return;
+        }
+        
+        // fudge all the origin details:
+
+        this.SourceItems = (this.SourceItem as CollectionViewGroup).Items.Cast<object>().ToArray();
+        this.SourceItem = this.SourceItems.Cast<object>().FirstOrDefault();
+        // find SourceItem's container (assume the first descendant with a matching DataContext is the container)
+        this.SourceContainer = VisualTreeExtensions.FindDescendent(this.SourceContainer, d => ((d as FrameworkElement)?.DataContext ?? (d as FrameworkContentElement)?.DataContext) == this.SourceItem);
+        this.SourceCollection = ItemsControl.ItemsControlFromItemContainer(this.SourceContainer).ItemsSource;
+      } else {
+        this.SourceGroup = root.FindGroup(this.DragStartPosition);
+        this.SourceCollection = owner.ItemsSource ?? owner.Items;
+
+        this.SourceItems = root.ReflectSelectedItems().Cast<object>().ToArray();
+
+        // Some controls (I'm looking at you TreeView!) haven't updated their
+        // SelectedItem by this point. Check to see if there 1 or less item in 
+        // the SourceItems collection, and if so, override the control's 
+        // SelectedItems with the clicked item.
+        // edit: just check if the SelectedItems contains the sourceitem.
+        if (this.SourceItems == null || !this.SourceItems.Cast<object>().Contains(this.SourceItem)) {
+          this.SourceItems = new object[] { this.SourceItem };
+        }
+                
+      }
+
+      this.DragStartPosition = e.GetPosition((IInputElement)this.SourceControl);
       this.Effects = DragDropEffects.None;
       this.MouseButton = e.ChangedButton;
-      this.VisualSource = sender as UIElement;
-      this.DragDropCopyKeyState = DragDrop.GetDragDropCopyKeyState(this.VisualSource);
+      this.SourceControl = root as UIElement;
+      this.DragDropCopyKeyState = DragDrop.GetDragDropCopyKeyState(this.SourceControl);
 
-      if (sender is ItemsControl) {
-        var itemsControl = (ItemsControl)sender;
-
-        this.SourceGroup = itemsControl.FindGroup(this.DragStartPosition);
-        this.VisualSourceFlowDirection = itemsControl.GetItemsPanelFlowDirection();
-
-        var sourceItem = e.OriginalSource as UIElement; // If we can't cast object as a UIElement it might be a FrameworkContentElement, if so try and use its parent.
-        if (sourceItem == null && e.OriginalSource is FrameworkContentElement) {
-          sourceItem = ((FrameworkContentElement)e.OriginalSource).Parent as UIElement;
-        }
-        UIElement item = null;
-        if (sourceItem != null) {
-          item = itemsControl.GetItemContainer(sourceItem);
-        }
-          
-        if (item == null) {
-          if (DragDrop.GetDragDirectlySelectedOnly(VisualSource))
-            item = itemsControl.GetItemContainerAt(e.GetPosition(itemsControl));
-          else
-            item = itemsControl.GetItemContainerAt(e.GetPosition(itemsControl), itemsControl.GetItemsPanelOrientation());
-        }
-
-        if (item != null) {
-          // Remember the relative position of the item being dragged
-          this.PositionInDraggedItem = e.GetPosition(item);
-
-          var itemParent = ItemsControl.ItemsControlFromItemContainer(item);
-
-          if (itemParent != null) {
-            this.SourceCollection = itemParent.ItemsSource ?? itemParent.Items;
-            this.SourceIndex = itemParent.ItemContainerGenerator.IndexFromContainer(item);
-            this.SourceItem = itemParent.ItemContainerGenerator.ItemFromContainer(item);
-          } else {
-            this.SourceIndex = -1;
-          }
-          this.SourceItems = itemsControl.GetSelectedItems();
-
-          // Some controls (I'm looking at you TreeView!) haven't updated their
-          // SelectedItem by this point. Check to see if there 1 or less item in 
-          // the SourceItems collection, and if so, override the control's 
-          // SelectedItems with the clicked item.
-          if (this.SourceItems.Cast<object>().Count() <= 1) {
-            this.SourceItems = Enumerable.Repeat(this.SourceItem, 1);
-          }
-
-          this.VisualSourceItem = item;
-        } else {
-          this.SourceCollection = itemsControl.ItemsSource ?? itemsControl.Items;
-        }
-      } else {
-        if (sender is UIElement) {
-          this.PositionInDraggedItem = e.GetPosition((UIElement)sender);
-        }
-      }
-
-      if (this.SourceItems == null) {
-        this.SourceItems = Enumerable.Empty<object>();
-      }
+      // Remember the relative position of the item being dragged
+      this.PositionInDraggedItem = e.GetPosition((IInputElement)this.SourceContainer);
+      this.SourceControlFlowDirection = root.GetItemsPanelFlowDirection();      
+      
     }
 
     /// <summary>
@@ -109,7 +89,7 @@ namespace GongSolutions.Wpf.DragDrop
     public object Data { get; set; }
 
     /// <summary>
-    /// Gets the position of the click that initiated the drag, relative to <see cref="VisualSource"/>.
+    /// Gets the position of the click that initiated the drag, relative to <see cref="SourceControl"/>.
     /// </summary>
     public Point DragStartPosition { get; private set; }
 
@@ -174,7 +154,7 @@ namespace GongSolutions.Wpf.DragDrop
     /// <summary>
     /// Gets the control that initiated the drag.
     /// </summary>
-    public UIElement VisualSource { get; private set; }
+    public UIElement SourceControl { get; private set; }
 
     /// <summary>
     /// Gets the item in an ItemsControl that started the drag.
@@ -182,15 +162,15 @@ namespace GongSolutions.Wpf.DragDrop
     /// 
     /// <remarks>
     /// If the control that initiated the drag is an ItemsControl, this property will hold the item
-    /// container of the clicked item. For example, if <see cref="VisualSource"/> is a ListBox this
+    /// container of the clicked item. For example, if <see cref="SourceControl"/> is a ListBox this
     /// will hold a ListBoxItem.
     /// </remarks>
-    public UIElement VisualSourceItem { get; private set; }
+    public DependencyObject SourceContainer { get; private set; }
 
     /// <summary>
     /// Gets the FlowDirection of the current drag source.
     /// </summary>
-    public FlowDirection VisualSourceFlowDirection { get; private set; }
+    public FlowDirection SourceControlFlowDirection { get; private set; }
 
     /// <summary>
     /// Gets the <see cref="IDataObject"/> which is used by the drag and drop operation. Set it to

@@ -27,12 +27,12 @@ namespace GongSolutions.Wpf.DragDrop
     {
       if (CanAcceptData(dropInfo)) {
         // when source is the same as the target set the move effect otherwise set the copy effect
-        var moveData = dropInfo.DragInfo.VisualSource == dropInfo.VisualTarget
+        var moveData = dropInfo.DragInfo.SourceControl == dropInfo.VisualTarget
                        || !dropInfo.KeyStates.HasFlag(dropInfo.DragInfo.DragDropCopyKeyState)
-                       || dropInfo.DragInfo.VisualSourceItem is TabItem
-                       || dropInfo.DragInfo.VisualSourceItem is TreeViewItem
-                       || dropInfo.DragInfo.VisualSourceItem is MenuItem
-                       || dropInfo.DragInfo.VisualSourceItem is ListBoxItem;
+                       || dropInfo.DragInfo.SourceContainer is TabItem
+                       || dropInfo.DragInfo.SourceContainer is TreeViewItem
+                       || dropInfo.DragInfo.SourceContainer is MenuItem
+                       || dropInfo.DragInfo.SourceContainer is ListBoxItem;
         dropInfo.Effects = moveData ? DragDropEffects.Move : DragDropEffects.Copy;
         var isTreeViewItem = dropInfo.InsertPosition.HasFlag(RelativeInsertPosition.TargetItemCenter) && dropInfo.VisualTargetItem is TreeViewItem;
         dropInfo.DropTargetAdorner = isTreeViewItem ? DropTargetAdorners.Highlight : DropTargetAdorners.Insert;
@@ -45,54 +45,23 @@ namespace GongSolutions.Wpf.DragDrop
     /// <param name="dropInfo">Information about the drop.</param>
     public virtual void Drop(IDropInfo dropInfo)
     {
-      if (dropInfo == null || dropInfo.DragInfo == null) {
-        return;
-      }
-      
-      var insertIndex = dropInfo.UnfilteredInsertIndex;
+      if (dropInfo == null || dropInfo.DragInfo == null) { return; }
+                    
+      var insertIndex = dropInfo.AdjustedInsertIndex;
       var destinationList = dropInfo.TargetCollection.TryGetList();
       var data = ExtractData(dropInfo.Data);
-
-      // when source is the same as the target remove the data from source and fix the insertion index
-      var moveData = dropInfo.DragInfo.VisualSource == dropInfo.VisualTarget
-                     || !dropInfo.KeyStates.HasFlag(dropInfo.DragInfo.DragDropCopyKeyState)
-                     || dropInfo.DragInfo.VisualSourceItem is TabItem
-                     || dropInfo.DragInfo.VisualSourceItem is TreeViewItem
-                     || dropInfo.DragInfo.VisualSourceItem is MenuItem
-                     || dropInfo.DragInfo.VisualSourceItem is ListBoxItem;
-      if (moveData)
-      {
-        var sourceList = dropInfo.DragInfo.SourceCollection.TryGetList();
-
-        foreach (var o in data) {
-          var index = sourceList.IndexOf(o);
-
-          if (index != -1) {
-            sourceList.RemoveAt(index);
-            // so, is the source list the destination list too ?
-            if (Equals(sourceList, destinationList) && index < insertIndex) {
-              --insertIndex;
-            }
-          }
-        }
-      }
 
       var tabControl = dropInfo.VisualTarget as TabControl;
 
       // check for cloning
       var cloneData = dropInfo.Effects.HasFlag(DragDropEffects.Copy)
-                      || dropInfo.Effects.HasFlag(DragDropEffects.Link);
+                      ; // || dropInfo.Effects.HasFlag(DragDropEffects.Link); // Link means DON'T CLONE!
       foreach (var o in data) {
-        var obj2Insert = o;
-        if (cloneData) {
-          var cloneable = o as ICloneable;
-          if (cloneable != null) {
-            obj2Insert = cloneable.Clone();
-          }
-        }
+        var obj2Insert = (cloneData) ? (o as ICloneable).Clone() ?? o : o;                
 
         destinationList.Insert(insertIndex++, obj2Insert);
 
+        // probably should use this for any ItemsControl that doesn't use an ItemsPresenter (i.e. has a custom panel)
         if (tabControl != null) {
           // call ApplyTemplate for TabItem in TabControl to avoid this error:
           //
@@ -128,7 +97,7 @@ namespace GongSolutions.Wpf.DragDrop
       // do not drop on itself
       var isTreeViewItem = dropInfo.InsertPosition.HasFlag(RelativeInsertPosition.TargetItemCenter)
                            && dropInfo.VisualTargetItem is TreeViewItem;
-      if (isTreeViewItem && dropInfo.VisualTargetItem == dropInfo.DragInfo.VisualSourceItem) {
+      if (isTreeViewItem && dropInfo.VisualTargetItem == dropInfo.DragInfo.SourceContainer) {
         return false;
       }
 
@@ -143,7 +112,7 @@ namespace GongSolutions.Wpf.DragDrop
         return false;
       } else {
         if (TestCompatibleTypes(dropInfo.TargetCollection, dropInfo.Data)) {
-          var isChildOf = IsChildOf(dropInfo.VisualTargetItem, dropInfo.DragInfo.VisualSourceItem);
+          var isChildOf = IsChildOf(dropInfo.VisualTargetItem, (UIElement)dropInfo.DragInfo.SourceContainer);
           return !isChildOf;
         } else {
           return false;

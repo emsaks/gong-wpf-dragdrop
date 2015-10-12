@@ -1,0 +1,27 @@
+﻿<DataTemplate x:Name="DefaultEffectAdorner"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GongSolutions.Wpf.DragDrop" 
+             xmlns:converters="clr-namespace:GongSolutions.Wpf.DragDrop.Templates;assembly=GongSolutions.Wpf.DragDrop"
+             mc:Ignorable="d">
+    <DataTemplate.Resources>
+        <converters:IconConverter x:Key="iconConverter"/>
+        <converters:TextConverter x:Key="textConverter"/>
+    </DataTemplate.Resources>
+    <Border BorderBrush="DimGray" BorderThickness="1" CornerRadius="3">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="White" Offset="0"/>
+                <GradientStop Color="AliceBlue" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <StackPanel Orientation="Horizontal" Margin="2">
+            <Image Source="{Binding ActiveEffect, Converter={StaticResource ResourceKey=iconConverter}}" Height="12" Width="12"/>
+            <TextBlock Text="{Binding ActiveEffect, Converter={StaticResource textConverter}}" FontSize="11" Foreground="Blue" Margin="3,0,3,0"/>
+            <TextBlock Text="{Binding Destination}" FontSize="11" FontWeight="DemiBold" Foreground="DarkBlue" />
+        </StackPanel>
+    </Border>
+</DataTemplate>    
+

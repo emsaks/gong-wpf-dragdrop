@@ -38,8 +38,7 @@
               dd:DragDrop.IsDropTarget="True"
               dd:DragDrop.DropHandler="{Binding}"
               dd:DragDrop.DragAdornerTemplate="{x:Null}"
-              dd:DragDrop.DragDropContext="Employees"
-              dd:DragDrop.EffectNoneAdornerTemplate="{x:Null}">
+              dd:DragDrop.DragDropContext="Employees">
       <northwindExample:WPFDataGrid.Columns>
         <northwindExample:WPFDataGridTextColumn Header="First Name" Binding="{Binding FirstName, Mode=OneWay}" />
         <northwindExample:WPFDataGridTextColumn Header="Last Name" Binding="{Binding LastName, Mode=OneWay}" />

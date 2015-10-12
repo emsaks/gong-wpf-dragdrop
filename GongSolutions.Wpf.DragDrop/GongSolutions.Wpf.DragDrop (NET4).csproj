@@ -74,6 +74,8 @@
     <Compile Include="DragAdorner.cs" />
     <Compile Include="DragDrop.cs" />
     <Compile Include="DragInfo.cs" />
+    <Compile Include="DragTransaction.cs" />
+    <Compile Include="DrapDrop - Templates.cs" />
     <Compile Include="DropTargetAdorner.cs" />
     <Compile Include="DropInfo.cs" />
     <Compile Include="DropTargetAdorners.cs" />
@@ -84,7 +86,9 @@
     <Compile Include="IDragSource.cs" />
     <Compile Include="IDropInfo.cs" />
     <Compile Include="IDropTarget.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Playground.cs" />
+    <Compile Include="Templates\DefaultTemplateHelpers.cs" />
+    <Compile Include="Templates\DefaultTemplates.cs" />
     <Compile Include="Utilities\DragDropExtensions.cs" />
     <Compile Include="Utilities\HitTestUtilities.cs" />
     <Compile Include="Utilities\ItemsControlExtensions.cs" />
@@ -99,6 +103,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="gong-wpf-dragdrop.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\DefaultEffectAdorner.xaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Templates\DefaultDragAdorner.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

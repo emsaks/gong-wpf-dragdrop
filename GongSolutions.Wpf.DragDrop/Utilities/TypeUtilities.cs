@@ -91,5 +91,11 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
         return list ?? (enumerable != null ? enumerable.OfType<object>().ToList() : null);
       }
     }
+
+    public static T TryMemberwiseClone<T>(this T source)
+    {
+      return (T)typeof(T).GetMethod("MemberwiseClone", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
+        .Invoke(source, null);
+    }
   }
 }

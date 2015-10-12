@@ -65,6 +65,8 @@ namespace GongSolutions.Wpf.DragDrop
     /// </remarks>
     int UnfilteredInsertIndex { get; }
 
+    int AdjustedInsertIndex { get; }
+
     /// <summary>
     /// Gets the collection that the target ItemsControl is bound to.
     /// </summary>

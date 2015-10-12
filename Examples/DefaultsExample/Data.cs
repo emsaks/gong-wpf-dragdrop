@@ -10,7 +10,8 @@ using DragDrop = GongSolutions.Wpf.DragDrop.DragDrop;
 namespace DefaultsExample
 {
   public class CustomDropHandlerForIssue85 : IDropTarget
-  {
+  {    
+
     public void DragOver(IDropInfo dropInfo)
     {
       dropInfo.Effects = DragDropEffects.Copy;
@@ -25,21 +26,15 @@ namespace DefaultsExample
 
   public class CustomDragHandlerForIssue84 : IDragSource
   {
-    public virtual void StartDrag(IDragInfo dragInfo)
+    public virtual DragDropEffects Dragged(IDragInfo dragInfo)
     {
       // nothing special here, use the default way
-      DragDrop.DefaultDragHandler.StartDrag(dragInfo);
+      if (dragInfo != null && (dragInfo.SourceIndex % 2) == 0) { return DragDropEffects.None; }     
+      return DragDrop.DefaultDragHandler.Dragged(dragInfo);
     }
 
-    public bool CanStartDrag(IDragInfo dragInfo)
-    {
-      // so here is the magic
-      if (dragInfo != null) {
-        if ((dragInfo.SourceIndex % 2) == 0) {
-          return false;
-        }
-      }
-      return true;
+    public void Detach(IDragInfo dragInfo) {
+      DragDrop.DefaultDragHandler.Detach(dragInfo);
     }
 
     public virtual void Dropped(IDropInfo dropInfo)
@@ -134,7 +129,7 @@ namespace DefaultsExample
       DragDrop.DefaultDropHandler.Drop(dropInfo);
       var data = DefaultDropHandler.ExtractData(dropInfo.Data).OfType<GroupedItem>().ToList();
       foreach (var groupedItem in data) {
-        groupedItem.Group = dropInfo.TargetGroup.Name.ToString();
+        groupedItem.Group = dropInfo.TargetGroup.Name.ToString();                         
       }
 
       // Changing group data at runtime isn't handled well: force a refresh on the collection view.
@@ -251,7 +246,7 @@ namespace DefaultsExample
       {
         if (this.m_Group != value) {
           this.m_Group = value;
-          this.OnPropertyChanged("Group");
+          this.OnPropertyChanged("Group");          
         }
       }
     }

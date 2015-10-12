@@ -30,7 +30,7 @@ namespace GongSolutions.Wpf.DragDrop
       }
     }
 
-    public void Detatch()
+    public void Detach()
     {
       this.m_AdornerLayer.Remove(this);
     }

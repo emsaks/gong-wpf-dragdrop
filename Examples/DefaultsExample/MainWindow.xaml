@@ -74,26 +74,32 @@
           </ItemsControl.ItemTemplate>
         </ListBox>
 
-        <ListBox Grid.Column="1"
+                <ListBox Grid.Column="1"
                  Grid.Row="1"
+                 x:Name="lb2"
                  ItemsSource="{Binding Collection2}"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}">
-          <ListBox.ItemTemplate>
-            <DataTemplate>
-              <FlowDocumentScrollViewer IsSelectionEnabled="False"
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <FlowDocumentScrollViewer IsSelectionEnabled="False"
                                         IsHitTestVisible="False">
-                <FlowDocument>
-                  <Paragraph>
-                    <TextBlock Text="{Binding}" />
-                  </Paragraph>
-                </FlowDocument>
-              </FlowDocumentScrollViewer>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
-      </Grid>
+                                <FlowDocument>
+                                    <Paragraph>
+                                        <TextBlock Text="{Binding}" />
+                                    </Paragraph>
+                                </FlowDocument>
+                            </FlowDocumentScrollViewer>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <!--<Canvas Width="250" Height="250">
+                    <Canvas.Background>
+                        <VisualBrush Visual="{Binding ElementName=lb2}" Stretch="None"/>
+                    </Canvas.Background>
+                </Canvas>-->
+            </Grid>
     </TabItem>
 
     <TabItem Header="Issue 42">
@@ -203,7 +209,7 @@
                  SelectionMode="Extended"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
         <ListBox Grid.Column="1"
                  Grid.Row="1"
@@ -212,7 +218,11 @@
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
-
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <VisualBrush Visual="{Binding ElementName=lb2}"/>
+                    </Rectangle.Fill>
+                </Rectangle>
         <TextBlock Grid.Row="2"
                    Margin="0,8,0,8"
                    TextWrapping="Wrap">
@@ -226,7 +236,7 @@
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
                  dd:DragDrop.DragDropCopyKeyState="ControlKey"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
       </Grid>
     </TabItem>
@@ -264,7 +274,7 @@
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
                  dd:DragDrop.DragDropContext="MainContext"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
 
         <TextBlock Grid.Column="1"
@@ -278,7 +288,7 @@
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
                  dd:DragDrop.DragDropContext="MainContext"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
 
         <TextBlock Grid.Column="0"
@@ -292,7 +302,7 @@
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
                  dd:DragDrop.DragDropContext="DifferentContext"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
 
         <TextBlock Grid.Column="1"
@@ -305,7 +315,7 @@
                  ItemsSource="{Binding Collection2}"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
       </Grid>
     </TabItem>
@@ -333,7 +343,7 @@
                  SelectionMode="Extended"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.UseDefaultDragAdorner="True">
           <ListBoxItem>Item1</ListBoxItem>
           <ListBoxItem>Item2</ListBoxItem>
@@ -384,7 +394,7 @@
                  SelectionMode="Extended"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
         <ListBox Grid.Column="1"
                  Grid.Row="2"
@@ -392,7 +402,7 @@
                  SelectionMode="Extended"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.IsDropTarget="True"
-                 dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                 dd:DragDrop.UseDefaultEffectsTemplate="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}" />
       </Grid>
     </TabItem>
@@ -1220,7 +1230,7 @@
                         dd:DragDrop.DragDropContext="OuterContext"
                         dd:DragDrop.IsDragSource="True"
                         dd:DragDrop.IsDropTarget="True"
-                        dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                        dd:DragDrop.UseDefaultEffectsTemplate="True"
                         dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}">
             <ItemsControl.ItemTemplate>
               <DataTemplate>

@@ -214,7 +214,16 @@ namespace GongSolutions.Wpf.DragDrop
     /// <summary>
     /// Gets the current insert position within <see cref="TargetCollection"/>.
     /// </summary>
-    public int InsertIndex { get; private set; }
+    private int m_InsertIndex = -1;
+    public int InsertIndex {
+      get { return m_InsertIndex; }
+      private set
+      {
+        m_InsertIndex = value;
+        AdjustedInsertIndex = TargetCollection != DragInfo.SourceCollection ? UnfilteredInsertIndex :
+                                TargetCollection.Cast<object>().Take(UnfilteredInsertIndex).Except(DragInfo.SourceItems.Cast<object>()).Count();
+      }
+    }
 
     /// <summary>
     /// Gets the current insert position within the source (unfiltered) <see cref="TargetCollection"/>.
@@ -223,6 +232,7 @@ namespace GongSolutions.Wpf.DragDrop
     /// This should be only used in a Drop action.
     /// This works only correct with different objects (string, int, etc won't work correct).
     /// </remarks>
+    ///
     public int UnfilteredInsertIndex
     {
       get
@@ -242,7 +252,9 @@ namespace GongSolutions.Wpf.DragDrop
         return insertIndex;
       }
     }
-
+    
+    public int AdjustedInsertIndex { get; private set; }
+  
     /// <summary>
     /// Gets the collection that the target ItemsControl is bound to.
     /// </summary>
@@ -320,7 +332,7 @@ namespace GongSolutions.Wpf.DragDrop
         get
         {
             // Check if DragInfo stuff exists
-            if (this.DragInfo == null || this.DragInfo.VisualSource == null) {
+            if (this.DragInfo == null || this.DragInfo.SourceControl == null) {
                 return true;
             }
             // A target should be exists
@@ -329,7 +341,7 @@ namespace GongSolutions.Wpf.DragDrop
             }
 
             // Source element has a drag context constraint, we need to check the target property matches.
-            var sourceContext = this.DragInfo.VisualSource.GetValue(DragDrop.DragDropContextProperty) as string;
+            var sourceContext = this.DragInfo.SourceControl.GetValue(DragDrop.DragDropContextProperty) as string;
             if (String.IsNullOrEmpty(sourceContext)) {
                 return true;
             }

@@ -6,7 +6,7 @@ namespace GongSolutions.Wpf.DragDrop
 {
   public class DefaultDragHandler : IDragSource
   {
-    public virtual void StartDrag(IDragInfo dragInfo)
+    public virtual DragDropEffects Dragged(IDragInfo dragInfo)
     {
       var itemCount = dragInfo.SourceItems.Cast<object>().Count();
 
@@ -16,14 +16,16 @@ namespace GongSolutions.Wpf.DragDrop
         dragInfo.Data = TypeUtilities.CreateDynamicallyTypedList(dragInfo.SourceItems);
       }
 
-      dragInfo.Effects = (dragInfo.Data != null) ?
+      return (dragInfo.Data != null) ?
                            DragDropEffects.Copy | DragDropEffects.Move :
                            DragDropEffects.None;
-    }
+    }        
 
-    public bool CanStartDrag(IDragInfo dragInfo)
+    public void Detach(IDragInfo dragInfo)
     {
-      return true;
+      var src = dragInfo.SourceCollection.TryGetList();
+      if (src == null) { return; }      
+      foreach (var i in dragInfo.SourceItems) { src.Remove(i); }
     }
 
     public virtual void Dropped(IDropInfo dropInfo)

@@ -17,7 +17,7 @@ namespace GongSolutions.Wpf.DragDrop
     object Data { get; set; }
 
     /// <summary>
-    /// Gets the position of the click that initiated the drag, relative to <see cref="VisualSource"/>.
+    /// Gets the position of the click that initiated the drag, relative to <see cref="SourceControl"/>.
     /// </summary>
     Point DragStartPosition { get; }
 
@@ -81,7 +81,7 @@ namespace GongSolutions.Wpf.DragDrop
     /// <summary>
     /// Gets the control that initiated the drag.
     /// </summary>
-    UIElement VisualSource { get; }
+    UIElement SourceControl { get; }
 
     /// <summary>
     /// Gets the item in an ItemsControl that started the drag.
@@ -89,15 +89,15 @@ namespace GongSolutions.Wpf.DragDrop
     /// 
     /// <remarks>
     /// If the control that initiated the drag is an ItemsControl, this property will hold the item
-    /// container of the clicked item. For example, if <see cref="VisualSource"/> is a ListBox this
+    /// container of the clicked item. For example, if <see cref="SourceControl"/> is a ListBox this
     /// will hold a ListBoxItem.
     /// </remarks>
-    UIElement VisualSourceItem { get; }
+    DependencyObject SourceContainer { get; }
 
     /// <summary>
     /// Gets the FlowDirection of the current drag source.
     /// </summary>
-    FlowDirection VisualSourceFlowDirection { get; }
+    FlowDirection SourceControlFlowDirection { get; }
 
     /// <summary>
     /// Gets the <see cref="IDataObject"/> which is used by the drag and drop operation. Set it to

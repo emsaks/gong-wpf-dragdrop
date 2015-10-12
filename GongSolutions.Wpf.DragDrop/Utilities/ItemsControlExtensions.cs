@@ -272,6 +272,7 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
 
     public static IEnumerable GetSelectedItems(this ItemsControl itemsControl)
     {
+
       //if (itemsControl.GetType().IsAssignableFrom(typeof(MultiSelector)))
       if (typeof(MultiSelector).IsAssignableFrom(itemsControl.GetType())) {
         return ((MultiSelector)itemsControl).SelectedItems;
@@ -294,6 +295,21 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
       } else {
         return Enumerable.Empty<object>();
       }
+    }
+
+    public static IEnumerable ReflectSelectedItems(this ItemsControl itemsControl)
+    {
+      var items = (itemsControl.GetType().GetProperty("SelectedItems")?.GetValue(itemsControl, null) as IEnumerable);
+      if (items != null) { return items; } 
+      else { 
+        var item = itemsControl.ReflectSelectedItem();
+        if (item != null) { return new object[] { item }; } else { return Enumerable.Empty<object>();  }
+      }      
+    }
+
+    public static object ReflectSelectedItem(this ItemsControl itemsControl)
+    {
+      return itemsControl.GetType().GetProperty("SelectedItem")?.GetValue(itemsControl, null);
     }
 
     public static bool GetItemSelected(this ItemsControl itemsControl, object item)

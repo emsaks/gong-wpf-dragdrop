@@ -12,7 +12,7 @@ namespace GongSolutions.Wpf.DragDrop
   public interface IDragSource
   {
     /// <summary>
-    /// Queries whether a drag can be started.
+    /// Requests that a drag be started.
     /// </summary>
     /// 
     /// <param name="dragInfo">
@@ -23,13 +23,20 @@ namespace GongSolutions.Wpf.DragDrop
     /// To allow a drag to be started, the <see cref="DragInfo.Effects"/> property on <paramref name="dragInfo"/> 
     /// should be set to a value other than <see cref="DragDropEffects.None"/>. 
     /// </remarks>
-    void StartDrag(IDragInfo dragInfo);
+    DragDropEffects Dragged(IDragInfo dragInfo);
 
     /// <summary>
     /// With this action it's possible to check if the drga&drop operation is allowed to start
     /// e.g. check for a UIElement inside a list view item, that should not start a drag&drop operation
     /// </summary>
-    bool CanStartDrag(IDragInfo dragInfo);
+    //bool CanStartDrag(IDragInfo dragInfo);
+    
+
+    /// <summary>
+    /// If a move is completed, requests removal of the dragged items from the source collection.
+    /// </summary>
+    /// <param name="dragInfo"></param>
+    void Detach(IDragInfo dragInfo);
 
     /// <summary>
     /// Notifies the drag handler that a drop has occurred.

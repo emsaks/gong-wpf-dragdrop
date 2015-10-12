@@ -128,6 +128,11 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
       yield break;
     }
 
+    public static DependencyObject FindDescendent(this DependencyObject d, Func<DependencyObject, bool> where)
+    {
+      return FindDescendent(d, where, c => false);
+    }
+
     public static DependencyObject FindDescendent(this DependencyObject d, Func<DependencyObject, bool> where, Func<DependencyObject, bool> skip)
     {      
       var childCount = VisualTreeHelper.GetChildrenCount(d);
@@ -161,7 +166,7 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
       return current;
     }
 
-    public static DependencyObject ContainerOrDefault(this DependencyObject d, ItemsControl root)
+    public static UIElement ContainerOrDefault(this DependencyObject d, ItemsControl root, ref ItemsControl owner, ref int index)
     {
       DependencyObject current = d;
       DependencyObject container = null;
@@ -169,15 +174,16 @@ namespace GongSolutions.Wpf.DragDrop.Utilities
       while (current != null) {
         DependencyObject parent = VisualTreeHelper.GetParent(current);
         if (((parent as Panel)?.IsItemsHost ?? false) && container == null) {
-          var owner = FindAncestor(current, a => a is ItemsControl) as ItemsControl;
+          owner = ItemsControl.ItemsControlFromItemContainer(current); // FindAncestor(current, a => a is ItemsControl) as ItemsControl;
           if (owner == null) { return null; }
-          if (owner.ItemContainerGenerator.IndexFromContainer(current) >= 0) { container = current; }
+          index = owner.ItemContainerGenerator.IndexFromContainer(current);
+          if (index >= 0) { container = current; }
           parent = owner;          
         } else if(current is ItemsControl && (parent as Panel)?.IsItemsHost != true) {
           container = null;
         }
 
-        if (parent == root) { return container; }                       
+        if (parent == root) { return (UIElement)container; }                       
         current = parent;        
       }
 
